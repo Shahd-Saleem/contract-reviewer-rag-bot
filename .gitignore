@@ -1,0 +1,20 @@
+# Secret Keys & Environment Files
+.env
+*.env
+
+# Python Virtual Environment
+venv/
+ENV/
+env/
+
+# Vector Database Local Files
+chroma_db/
+*.chromadb
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+
+# System Files
+.DS_Store
+Thumbs.db
