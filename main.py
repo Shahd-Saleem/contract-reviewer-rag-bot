@@ -29,4 +29,13 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_size= 1000,
     chunk_overlap= 200,
 )
-text_splitted_document = text_splitter.split_documents(documents)
+chunks = text_splitter.split_documents(documents)
+
+
+# STEP 3: Create embeddings and store in vector database
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/text-embedding-004",
+    google_api_key=api_key
+)
