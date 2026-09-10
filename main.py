@@ -32,10 +32,31 @@ text_splitter = RecursiveCharacterTextSplitter(
 chunks = text_splitter.split_documents(documents)
 
 
-# STEP 3: Create embeddings and store in vector database
+# STEP 3: Create embeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004",
+    model="models/gemini-embedding-001",
     google_api_key=api_key
 )
+
+
+# STEP 4: Store into vector database
+from langchain_chroma import Chroma
+
+db_path = "./chroma_db"
+
+vector_store = Chroma.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    persist_directory=db_path
+)
+
+# STEP 5: Test Similarity Search
+query = "What are the penalties or fees for early termination?"
+results = vector_store.similarity_search(query, k=2)
+
+print("\n--- RETRIEVAL TEST RESULTS ---")
+for i, res in enumerate(results, 1):
+    print(f"\nResult {i} (Source: {res.metadata.get('source')}):")
+    print(res.page_content)
