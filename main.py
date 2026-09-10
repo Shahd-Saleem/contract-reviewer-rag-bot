@@ -10,7 +10,7 @@ load_dotenv()
 
 api_key = os.getenv('GEMINI_API_KEY')
 
-# STEP 1: Load contracts from pdf files:
+# STEP 1: Load contracts from PDF files:
 doc_directory = './docs'
 documents = []
 file_paths = [os.path.join(doc_directory, file) for file in os.listdir(doc_directory) if file.endswith('.md')]
@@ -21,3 +21,12 @@ for file_path in file_paths:
     documents.extend(loader.load())
 
 print(f"Successfully loaded {len(documents)} contract document(s)!")
+
+
+# STEP 2: Split the contract into chunks
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size= 1000,
+    chunk_overlap= 200,
+)
+text_splitted_document = text_splitter.split_documents(documents)
