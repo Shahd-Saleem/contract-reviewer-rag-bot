@@ -1,0 +1,13 @@
+MASTER SERVICES AGREEMENT
+
+1. SCOPE OF SERVICES
+Provider agrees to render IT consulting services as detailed in individual Statements of Work (SOW) executed under this Agreement.
+
+2. PAYMENT TERMS AND FEES
+Invoices shall be issued on the 1st day of each calendar month. Client agrees to pay all undisputed invoice amounts within thirty (30) days of receipt (Net 30). Late payments shall incur a penalty fee of 1.5% per month or the maximum rate allowed by law, whichever is lower.
+
+3. TERMINATION AND CANCELLATION
+Either party may terminate this Agreement without cause by providing at least forty-five (45) days prior written notice. If Client terminates without cause prior to completion of an active SOW, Client shall pay Provider an early termination fee equal to 20% of the remaining SOW contract value.
+
+4. LIMITATION OF LIABILITY
+In no event shall either party's aggregate liability under this Agreement exceed the total fees paid by Client to Provider in the six (6) months preceding the event giving rise to the claim.
