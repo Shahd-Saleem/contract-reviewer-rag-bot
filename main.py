@@ -85,3 +85,54 @@ def retrieve(query: str, k: int = 3):
 #print("\n")
 
 
+# STEP 4: Generation with Gemini
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+# Initialize Gemini with temperature=0 for deterministic and factual outputs
+llm = ChatGoogleGenerativeAI(
+    model="gemini-3.6-flash",
+    google_api_key=api_key,
+    temperature=0
+)
+
+def answer_question(query: str, k: int = 3):
+    retrieved_chunks = retrieve(query, k=k)
+    
+    context = "\n\n---\n\n".join(
+        f"[Source: {c.metadata.get('source', 'Unknown')}]\n{c.page_content}"
+        for c in retrieved_chunks
+    )
+    
+    prompt = f"""You are a contract review assistant. Answer the question using ONLY the context below.
+
+If the answer isn't in the context, say "Not found in the provided documents."
+Always cite which source document(s) you used.
+
+Context:
+{context}
+
+Question: {query}
+Answer:"""
+
+    response = llm.invoke(prompt)
+    
+    # Extract string from response block
+    if isinstance(response.content, list):
+        answer_text = "".join(
+            block["text"] if isinstance(block, dict) and "text" in block else str(block)
+            for block in response.content
+        )
+    else:
+        answer_text = str(response.content)
+
+    return answer_text, retrieved_chunks
+
+
+# Quick Test of Step 4
+print("\nSTEP 4 GENERATION TEST:")
+test_q = "What are the penalties or buyout fees for terminating the commercial lease early?"
+answer, chunks_used = answer_question(test_q)
+
+print(f"Question: {test_q}\n")
+print(f"Gemini Answer:\n{answer}")
+print("\n")
