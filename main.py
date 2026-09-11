@@ -47,7 +47,6 @@ chunks = text_splitter.split_documents(documents)
 #    page = chunk.metadata.get('page', 'N/A')
 #    print(f"\n--- Chunk {i+1} (Source: {source} | Page: {page}) ---")
 #    print(chunk.page_content[:350] + "...")
-#print('\n')
 
 
 # STEP 3: Embeddings, Vector Store & Retrieval Function
@@ -90,7 +89,6 @@ def retrieve(query: str, k: int = 5):
 #    src = doc.metadata.get('source', 'Unknown')
 #    print(f"\nResult {idx} (Source: {src}):")
 #    print(doc.page_content[:250] + "...")
-#print("\n")
 
 
 # STEP 4: Generation with Gemini
@@ -143,7 +141,6 @@ Answer:"""
 
 #print(f"Question: {test_q}\n")
 #print(f"Gemini Answer:\n{answer}")
-#print("\n")
 
 
 # STEP 5: Automated Pipeline Evaluation
@@ -209,7 +206,6 @@ eval_dataset = [
 
 import time
 def evaluate_pipeline(dataset):
-    print("\n")
     print("STEP 5: EVALUATION REPORT:")
     
     retrieval_hits = 0
@@ -237,7 +233,6 @@ def evaluate_pipeline(dataset):
 
     score = (retrieval_hits / total_queries) * 100
     print(f"\nFinal Retrieval Recall Score: {score:.1f}%")
-    print("\n")
 
 # Execute Evaluation
 evaluate_pipeline(eval_dataset)
