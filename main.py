@@ -6,7 +6,7 @@ warnings.filterwarnings("ignore")
 
 logging.getLogger("unstructured").setLevel(logging.ERROR)
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 api_key = os.getenv('GEMINI_API_KEY')
 
@@ -14,17 +14,21 @@ api_key = os.getenv('GEMINI_API_KEY')
 doc_directory = './docs'
 documents = []
 SUPPORTED_EXTENSIONS = ('.md', '.pdf', '.txt')
-file_paths = [
-    os.path.join(doc_directory, file)
-    for file in os.listdir(doc_directory)
-    if file.lower().endswith(SUPPORTED_EXTENSIONS)
-]
-assert len(file_paths) > 0, f"No supported files found in {doc_directory}!"
 
-from langchain_community.document_loaders import UnstructuredFileLoader
-for file_path in file_paths:
-    loader = UnstructuredFileLoader(file_path, mode="single")
-    documents.extend(loader.load())
+if os.path.exists(doc_directory):
+    file_paths = [
+        os.path.join(doc_directory, file)
+        for file in os.listdir(doc_directory)
+        if file.lower().endswith(SUPPORTED_EXTENSIONS)
+    ]
+    if file_paths:
+        from langchain_community.document_loaders import UnstructuredFileLoader
+        for file_path in file_paths:
+            loader = UnstructuredFileLoader(file_path, mode="single")
+            loaded_docs = loader.load()
+            for doc in loaded_docs:
+                doc.metadata["source"] = os.path.basename(file_path)
+            documents.extend(loaded_docs)
 
 # Ensure that all files (md, txt, and pdf) files can be read by the system:
 # print(f"Successfully loaded {len(documents)} contract document(s)!")
@@ -36,7 +40,7 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_size= 1000,
     chunk_overlap= 200,
 )
-chunks = text_splitter.split_documents(documents)
+chunks = text_splitter.split_documents(documents) if documents else []
 
 # print(f"Total chunks created: {len(chunks)}")
 
@@ -61,24 +65,37 @@ embeddings = GoogleGenerativeAIEmbeddings(
 
 db_path = "./chroma_db"
 
-# Load existing database if directory exists, otherwise create a new one
-if os.path.exists(db_path) and os.listdir(db_path):
-    print("Loading existing Chroma vector database from disk...")
-    vector_store = Chroma(
-        persist_directory=db_path,
-        embedding_function=embeddings
-    )
-else:
-    print("Creating new Chroma vector database...")
-    vector_store = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory=db_path
-    )
+# Initialize explicit persistent collection
+vector_store = Chroma(
+    persist_directory=db_path,
+    embedding_function=embeddings,
+    collection_name="contract_analysis"
+)
 
-def retrieve(query: str, k: int = 5):
-    """Retrieves top-k relevant document chunks for a given search query."""
-    return vector_store.max_marginal_relevance_search(query, k=k)
+def retrieve(query: str, k: int = 5, filter_dict: dict = None):
+    """Retrieves top-k relevant document chunks with strict optional metadata filtering."""
+    chroma_filter = None
+    
+    if filter_dict and "source" in filter_dict:
+        target_src = filter_dict["source"]
+        
+        # Build flexible filter checking exact source match or basename match
+        chroma_filter = {
+            "$or": [
+                {"source": target_src},
+                {"source": os.path.basename(target_src)}
+            ]
+        }
+
+    try:
+        if chroma_filter:
+            return vector_store.max_marginal_relevance_search(query, k=k, filter=chroma_filter)
+        return vector_store.max_marginal_relevance_search(query, k=k)
+    except Exception:
+        # Fallback to standard similarity search if MMR filtering hit schema variations
+        if chroma_filter:
+            return vector_store.similarity_search(query, k=k, filter=chroma_filter)
+        return vector_store.similarity_search(query, k=k)
 
 # Test of Step 3
 #test_query = "What is the penalty for terminating the commercial lease early?"
@@ -101,9 +118,12 @@ llm = ChatGoogleGenerativeAI(
     temperature=0
 )
 
-def answer_question(query: str, k: int = 5):
-    retrieved_chunks = retrieve(query, k=k)
+def answer_question(query: str, k: int = 5, filter_dict: dict = None):
+    retrieved_chunks = retrieve(query, k=k, filter_dict=filter_dict)
     
+    if not retrieved_chunks:
+        return "Not found in the provided documents.", []
+
     context = "\n\n---\n\n".join(
         f"[Source: {c.metadata.get('source', 'Unknown')}]\n{c.page_content}"
         for c in retrieved_chunks
@@ -122,7 +142,6 @@ Answer:"""
 
     response = llm.invoke(prompt)
     
-    # Extract string from response block
     if isinstance(response.content, list):
         answer_text = "".join(
             block["text"] if isinstance(block, dict) and "text" in block else str(block)
