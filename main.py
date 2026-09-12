@@ -145,94 +145,94 @@ Answer:"""
 
 # STEP 5: Automated Pipeline Evaluation
 # Evaluation dataset matching the uploaded contract and terms documents
-eval_dataset = [
-    {
-        "question": "What is the mandatory buyout fee and security deposit forfeit for early lease termination?",
-        "expected_source": "commercial_lease_agreement"
-    },
-    {
-        "question": "Under what conditions must lease repairs be approved in writing by the Landlord?",
-        "expected_source": "commercial_lease_agreement"
-    },
-    {
-        "question": "What is the geographic radius enforced by the Non-Compete clause, and how long does it last?",
-        "expected_source": "employment_contract"
-    },
-    {
-        "question": "How is severance pay calculated if an employee is terminated without cause?",
-        "expected_source": "employment_contract"
-    },
-    {
-        "question": "How often does the automatic baseline price increase occur, and by what percentage?",
-        "expected_source": "predatory_vendor_contract"
-    },
-    {
-        "question": "What is the exact window and method required to cancel the software agreement?",
-        "expected_source": "predatory_vendor_contract"
-    },
-    {
-        "question": "How long is Customer data retained after contract termination, and what is the starting fee for data export?",
-        "expected_source": "saas_terms_of_service"
-    },
-    {
-        "question": "What is the maximum SLA credit cap if provider uptime falls below 99.5%?",
-        "expected_source": "saas_terms_of_service"
-    },
-    {
-        "question": "What are the payment due terms and late fee rates under this Master Services Agreement?",
-        "expected_source": "service_agreement"
-    },
-    {
-        "question": "What law governs the Google Terms of Service and where must disputes be resolved?",
-        "expected_source": "google_terms_of_service"
-    },
-    {
-        "question": "For business users, what is Google's total aggregate liability limit arising out of these terms?",
-        "expected_source": "google_terms_of_service"
-    },
-    {
-        "question": "What is the penalty-free cancellation window for service-only contracts vs. essential hardware contracts?",
-        "expected_source": "Consumer_Services_Agreement_du"
-    },
-    {
-        "question": "How many Spam Call complaints result in line suspension, and what happens after 1 complaint?",
-        "expected_source": "Consumer_Services_Agreement_du"
-    },
-    {
-        "question": "What is the maximum total monetary liability du will pay for all claims within a 12-month period under UAE law?",
-        "expected_source": "Consumer_Services_Agreement_du"
-    }
-]
+# eval_dataset = [
+#     {
+#         "question": "What is the mandatory buyout fee and security deposit forfeit for early lease termination?",
+#         "expected_source": "commercial_lease_agreement"
+#     },
+#     {
+#         "question": "Under what conditions must lease repairs be approved in writing by the Landlord?",
+#         "expected_source": "commercial_lease_agreement"
+#     },
+#     {
+#         "question": "What is the geographic radius enforced by the Non-Compete clause, and how long does it last?",
+#         "expected_source": "employment_contract"
+#     },
+#     {
+#         "question": "How is severance pay calculated if an employee is terminated without cause?",
+#         "expected_source": "employment_contract"
+#     },
+#     {
+#         "question": "How often does the automatic baseline price increase occur, and by what percentage?",
+#         "expected_source": "predatory_vendor_contract"
+#     },
+#     {
+#         "question": "What is the exact window and method required to cancel the software agreement?",
+#         "expected_source": "predatory_vendor_contract"
+#     },
+#     {
+#         "question": "How long is Customer data retained after contract termination, and what is the starting fee for data export?",
+#         "expected_source": "saas_terms_of_service"
+#     },
+#     {
+#         "question": "What is the maximum SLA credit cap if provider uptime falls below 99.5%?",
+#         "expected_source": "saas_terms_of_service"
+#     },
+#     {
+#         "question": "What are the payment due terms and late fee rates under this Master Services Agreement?",
+#         "expected_source": "service_agreement"
+#     },
+#     {
+#         "question": "What law governs the Google Terms of Service and where must disputes be resolved?",
+#         "expected_source": "google_terms_of_service"
+#     },
+#     {
+#         "question": "For business users, what is Google's total aggregate liability limit arising out of these terms?",
+#         "expected_source": "google_terms_of_service"
+#     },
+#     {
+#         "question": "What is the penalty-free cancellation window for service-only contracts vs. essential hardware contracts?",
+#         "expected_source": "Consumer_Services_Agreement_du"
+#     },
+#     {
+#         "question": "How many Spam Call complaints result in line suspension, and what happens after 1 complaint?",
+#         "expected_source": "Consumer_Services_Agreement_du"
+#     },
+#     {
+#         "question": "What is the maximum total monetary liability du will pay for all claims within a 12-month period under UAE law?",
+#         "expected_source": "Consumer_Services_Agreement_du"
+#     }
+# ]
 
-import time
-def evaluate_pipeline(dataset):
-    print("STEP 5: EVALUATION REPORT:")
+# import time
+# def evaluate_pipeline(dataset):
+#     print("STEP 5: EVALUATION REPORT:")
     
-    retrieval_hits = 0
-    total_queries = len(dataset)
+#     retrieval_hits = 0
+#     total_queries = len(dataset)
 
-    for idx, test in enumerate(dataset, 1):
-        q = test["question"]
-        exp_src = test["expected_source"]
+#     for idx, test in enumerate(dataset, 1):
+#         q = test["question"]
+#         exp_src = test["expected_source"]
         
-        answer, chunks = answer_question(q, k=5)
-        retrieved_sources = [c.metadata.get("source", "") for c in chunks]
+#         answer, chunks = answer_question(q, k=5)
+#         retrieved_sources = [c.metadata.get("source", "") for c in chunks]
         
-        # Check if the correct contract source file was retrieved
-        hit = any(exp_src in src for src in retrieved_sources)
-        if hit:
-            retrieval_hits += 1
+#         # Check if the correct contract source file was retrieved
+#         hit = any(exp_src in src for src in retrieved_sources)
+#         if hit:
+#             retrieval_hits += 1
             
-        print(f"\n[Test {idx}/{total_queries}]")
-        print(f"Query: {q}")
-        print(f"Expected File Match ({exp_src}): {'PASS' if hit else 'FAIL'}")
-        print(f"Generated Answer:\n{answer}")
-        print("-" * 50)
+#         print(f"\n[Test {idx}/{total_queries}]")
+#         print(f"Query: {q}")
+#         print(f"Expected File Match ({exp_src}): {'PASS' if hit else 'FAIL'}")
+#         print(f"Generated Answer:\n{answer}")
+#         print("-" * 50)
 
-        time.sleep(6)
+#         time.sleep(6)
 
-    score = (retrieval_hits / total_queries) * 100
-    print(f"\nFinal Retrieval Recall Score: {score:.1f}%")
+#     score = (retrieval_hits / total_queries) * 100
+#     print(f"\nFinal Retrieval Recall Score: {score:.1f}%")
 
-# Execute Evaluation
-evaluate_pipeline(eval_dataset)
+# # Execute Evaluation
+# evaluate_pipeline(eval_dataset)
